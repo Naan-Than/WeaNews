@@ -43,5 +43,5 @@ A **Flutter app** that shows **real-time weather data** and filters **news headl
 ### 1. Clone the repository
 
 ```bash
-git clone [https://github.com/your-username/flutter-weather-news.git](https://github.com/Naan-Than/WeaNews.git)
+git clone https://github.com/Naan-Than/WeaNews.git
 cd weanews
