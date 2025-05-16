@@ -72,12 +72,12 @@ class WeatherViewModel with ChangeNotifier {
     return null;
   }
 
-  Future<void> loadWeatherAndNews() async {
+  Future<void> loadWeatherAndNews(context) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final result = await service.getWeatherAndNews();
+      final result = await service.getWeatherAndNews(context);
       final weatherData = result['weather'];
       if (weatherData is WeatherResponse) {
         _weather = weatherData;

@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     Future.microtask(() {
       final viewModel = Provider.of<WeatherViewModel>(context, listen: false);
-      viewModel.loadWeatherAndNews();
+      viewModel.loadWeatherAndNews(context);
     });
   }
 
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
               ? Center(child: CircularProgressIndicator(color: Colors.white))
               : SafeArea(
                 child: RefreshIndicator(
-                  onRefresh: () => viewModel.loadWeatherAndNews(),
+                  onRefresh: () => viewModel.loadWeatherAndNews(context),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,

@@ -51,7 +51,7 @@ class WelcomeScreen extends StatelessWidget {
                     onPressed: () async {
                       final WeatherNewsService service = WeatherNewsService();
                       try {
-                       await service.getCurrentLocation();
+                       await service.getCurrentLocation(context);
                         Navigator.pushNamed(context, '/home');
                       } catch (e) {
                         print('Error getting location: $e');

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../models/news_response.dart';
@@ -11,22 +12,43 @@ class WeatherNewsService {
   final String weatherApiKey = 'ce08473ddeceb2729648c99efa30ec0d';
   final String newsApiKey = '3db571a0a3044839818cdd790d407726';
 
-  final String weatherBaseUrl = 'https://api.openweathermap.org/data/2.5/weather';
-  // final String weatherBaseUrl = 'https://api.openweathermap.org/data/3.0/onecall';
-  // final String newsBaseUrl = 'https://newsapi.org/v2/top-headlines';
+  final String weatherBaseUrl =
+      'https://api.openweathermap.org/data/2.5/weather';
   final String newsBaseUrl = 'https://newsapi.org/v2/everything';
 
-  Future<Position> getCurrentLocation() async {
+  Future<Position> getCurrentLocation(BuildContext context) async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Location services are disabled.');
+      // Show a popup to inform the user
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Location Services Disabled"),
+          content: Text("Please enable location services to continue."),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // close the dialog
+                await Geolocator.openLocationSettings(); // open location settings
+              },
+              child: Text("Open Settings"),
+            ),
+          ],
+        ),
+      );
+
+      // Re-check after the user returns from settings
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location services are still disabled.');
+      }
     }
 
     permission = await Geolocator.checkPermission();
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
@@ -44,7 +66,6 @@ class WeatherNewsService {
     );
   }
 
-
   Future<WeatherResponse> getWeather(double lat, double lon) async {
     try {
       final String url =
@@ -59,15 +80,16 @@ class WeatherNewsService {
     }
   }
 
-
-
   Future<NewsResponse?> getNews(WeatherResponse? weather) async {
-    if (weather == null || weather.weather == null || weather.weather!.isEmpty) {
+    if (weather == null ||
+        weather.weather == null ||
+        weather.weather!.isEmpty) {
       return null;
     }
 
     String keyword = '';
-    final String currentWeatherCondition = weather.weather![0].main?.toLowerCase() ?? '';
+    final String currentWeatherCondition =
+        weather.weather![0].main?.toLowerCase() ?? '';
 
     print("Current weather condition: $currentWeatherCondition");
 
@@ -108,6 +130,7 @@ class WeatherNewsService {
       return null;
     }
   }
+
   Future<NewsResponse?> getNewsByCategory(String category) async {
     try {
       final response = await _dio.get(
@@ -132,10 +155,9 @@ class WeatherNewsService {
     }
   }
 
-
-  Future<Map<String, dynamic>> getWeatherAndNews() async {
+  Future<Map<String, dynamic>> getWeatherAndNews(context) async {
     try {
-      final position = await getCurrentLocation();
+      final position = await getCurrentLocation(context);
       print("${position.latitude},${position.longitude}.........loc");
 
       final WeatherResponse weather = await getWeather(
@@ -149,13 +171,9 @@ class WeatherNewsService {
       if (keyword != null) {
         news = await getNews(weather);
       }
-      return {
-        'weather': weather,
-        'news': news,
-      };
+      return {'weather': weather, 'news': news};
     } catch (e) {
       throw Exception('Combined fetch failed: $e');
     }
   }
 }
-
